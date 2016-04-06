@@ -1,11 +1,13 @@
 /*
 
 Name: Timezone Converter
-Input: Current time or user specifed time
+Input: System time or user specifed time
 Output: Converted times
 
-Going to have to make something to convert the time zones to short form (sucks),
-
+TODO: improve the help,
+      add support for multiple inputs
+	  add support to output the results to a csv file
+	  add automation of ZONEINFO environment variable
 */
 
 package main
@@ -23,9 +25,8 @@ func main() {
 	tFormat := t.Format(time.RFC822)
 
 	//Define flags
-	nowFlag := flag.String("now", tFormat, "The current time (based on system time)")
-	inputFlag := flag.String("time", "", "Input the times to convert (format: 02 Jan 06 15:04 MST)")
-	timezoneFlag := flag.String("timezone", "America/Chicago", "Enter the time zones")
+	inputFlag := flag.String("time", tFormat, "Input the times to convert (format: 02 Jan 06 15:04 MST)")
+	timezoneFlag := flag.String("timezone", "", "Enter the time zones")
 
 	//Parse the flags
 	flag.Parse()
@@ -34,10 +35,21 @@ func main() {
 
 	date, _ := time.Parse(time.RFC822, *inputFlag)
 
-	fmt.Println(*nowFlag)                              //currentTime
-	fmt.Println(t.In(newLocation).Format(time.RFC822)) //formatted local time in specifed location
+	//Return current day and time and exit if no input is specified
+	if *inputFlag == "" {
+		fmt.Println("System time: " + tFormat) //currentTime
+		return
+	}
 
-	fmt.Println(*inputFlag)                               //time inputted by user
-	fmt.Println(date.In(newLocation).Format(time.RFC822)) //time in new location and formatted
+	if *timezoneFlag == "" { //return current day and time and exit if timezoneFlag is not specified
+		fmt.Println("System time: " + tFormat)
+		return
+	} else if *inputFlag == "" && *timezoneFlag != "" { //return the converted system time if the time is not specifed, but the timezone is specified
+		fmt.Println("System time: " + date.In(newLocation).Format(time.RFC822)) //time in new location and formatted
+	} else if *inputFlag != "" && *timezoneFlag != "" { //return the inputted day and time and the converted day and time if both flags contain input
+		fmt.Println("Inputed time: " + *inputFlag)                                 //time inputted by user
+		fmt.Println("Converted time: " + date.In(newLocation).Format(time.RFC822)) //time in new location and formatted
+
+	}
 
 }
