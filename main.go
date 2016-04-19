@@ -4,7 +4,7 @@ Name: Timezone Converter
 Input: System time or user specifed time
 Output: Converted times
 
-TODO: improve the help,
+TODO: improve the help
       add support for multiple inputs
 	  add support to output the results to a csv file
 	  add automation of ZONEINFO environment variable
@@ -15,8 +15,46 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strings"
 	"time"
 )
+
+//get time(s) from user
+func parsetime(timeInput string, tzInput string, sTime string) {
+
+	test := strings.Split(timeInput, ",")
+	test1 := strings.Split(tzInput, ",")
+
+	for _, inputs := range test {
+
+		date, _ := time.Parse(time.RFC822, inputs)
+
+		if inputs == "" {
+
+			fmt.Println("System Time: " + sTime)
+
+		} else {
+
+			fmt.Println("\n" + "Inputed Time:" + date.Format(time.RFC822))
+		}
+
+		for _, tz := range test1 {
+			newLocation, _ := time.LoadLocation(tz)
+
+			if tz != "" && inputs == "" {
+
+				date, _ := time.Parse(time.RFC822, sTime)
+				fmt.Println("Converted Time: " + date.In(newLocation).Format(time.RFC822))
+
+			} else if tz != "" && inputs != "" {
+				fmt.Println("Converted Time: " + date.In(newLocation).Format(time.RFC822))
+			}
+
+		}
+
+	}
+
+}
 
 func main() {
 
@@ -25,31 +63,12 @@ func main() {
 	tFormat := t.Format(time.RFC822)
 
 	//Define flags
-	inputFlag := flag.String("time", tFormat, "Input the times to convert (format: 02 Jan 06 15:04 MST)")
+	inputFlag := flag.String("time", "", "Input the times to convert (format: 02 Jan 06 15:04 MST)")
 	timezoneFlag := flag.String("timezone", "", "Enter the time zones")
 
 	//Parse the flags
 	flag.Parse()
 
-	newLocation, _ := time.LoadLocation(*timezoneFlag) //user inputted timezone
-
-	date, _ := time.Parse(time.RFC822, *inputFlag)
-
-	//Return current day and time and exit if no input is specified
-	if *inputFlag == "" {
-		fmt.Println("System time: " + tFormat) //currentTime
-		return
-	}
-
-	if *timezoneFlag == "" { //return current day and time and exit if timezoneFlag is not specified
-		fmt.Println("System time: " + tFormat)
-		return
-	} else if *inputFlag == "" && *timezoneFlag != "" { //return the converted system time if the time is not specifed, but the timezone is specified
-		fmt.Println("System time: " + date.In(newLocation).Format(time.RFC822)) //time in new location and formatted
-	} else if *inputFlag != "" && *timezoneFlag != "" { //return the inputted day and time and the converted day and time if both flags contain input
-		fmt.Println("Inputed time: " + *inputFlag)                                 //time inputted by user
-		fmt.Println("Converted time: " + date.In(newLocation).Format(time.RFC822)) //time in new location and formatted
-
-	}
+	parsetime(*inputFlag, *timezoneFlag, tFormat)
 
 }
