@@ -27,7 +27,8 @@ func parsetime(timeInput string, tzInput string, sTime string) {
 
 	for _, inputs := range test {
 
-		date, _ := time.Parse(time.RFC822, inputs)
+		date, _ := time.Parse(time.RFC822Z, inputs)
+		dFormat := date.Format(time.RFC822)
 
 		if inputs == "" {
 
@@ -35,7 +36,7 @@ func parsetime(timeInput string, tzInput string, sTime string) {
 
 		} else {
 
-			fmt.Println("\n" + "Inputed Time:" + date.Format(time.RFC822))
+			fmt.Println("\n" + "Inputed Time:" + dFormat)
 		}
 
 		for _, tz := range test1 {
@@ -43,11 +44,13 @@ func parsetime(timeInput string, tzInput string, sTime string) {
 
 			if tz != "" && inputs == "" {
 
-				date, _ := time.Parse(time.RFC822, sTime)
+				date, _ := time.Parse(time.RFC822Z, sTime)
+
 				fmt.Println("Converted Time: " + date.In(newLocation).Format(time.RFC822))
 
 			} else if tz != "" && inputs != "" {
 				fmt.Println("Converted Time: " + date.In(newLocation).Format(time.RFC822))
+
 			}
 
 		}
@@ -63,7 +66,7 @@ func main() {
 	tFormat := t.Format(time.RFC822)
 
 	//Define flags
-	inputFlag := flag.String("time", "", "Input the times to convert (format: 02 Jan 06 15:04 MST)")
+	inputFlag := flag.String("time", "", "Input the times to convert (format: 02 Jan 06 15:04 -0700)")
 	timezoneFlag := flag.String("timezone", "", "Enter the time zones")
 
 	//Parse the flags
